@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 
 #include "MenuSystem/MainMenu.h"
+#include "MenuSystem/MenuWidget.h"
 
 
 UAllMagicGameInstance::UAllMagicGameInstance(const FObjectInitializer & ObjectInitializer)
@@ -15,11 +16,24 @@ UAllMagicGameInstance::UAllMagicGameInstance(const FObjectInitializer & ObjectIn
 	if (!ensure(MenuBPClass.Class != nullptr)) return;
 	
 	MenuClass = MenuBPClass.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> InGameMenuBPClass(TEXT("/Game/MenuSystem/WBP_InGameMenu"));
+	if (!ensure(InGameMenuBPClass.Class != nullptr)) return;
+
+	InGameMenuClass = InGameMenuBPClass.Class;
 }
 
 void UAllMagicGameInstance::Init()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Found class: %s"), *MenuClass->GetName());
+}
+
+void UAllMagicGameInstance::LoadMainMenu()
+{
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!ensure(PlayerController != nullptr)) return;
+
+	PlayerController->ClientTravel("/Game/MenuSystem/MainMenu", ETravelType::TRAVEL_Absolute);
 }
 
 void UAllMagicGameInstance::LoadMenu()
@@ -29,7 +43,20 @@ void UAllMagicGameInstance::LoadMenu()
 	Menu = CreateWidget<UMainMenu>(this, MenuClass);
 	if (!ensure(Menu != nullptr)) return;
 
+	Menu->Setup();
 	Menu->SetMenuInterface(this);
+}
+
+void UAllMagicGameInstance::LoadInGameMenu()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Load InGame Menu"))
+	if (!ensure(InGameMenuClass != nullptr)) return;
+	UMenuWidget* InGameMenu = CreateWidget<UMenuWidget>(this, InGameMenuClass);
+
+	if (!ensure(InGameMenu != nullptr)) return;
+
+	InGameMenu->Setup();
+	InGameMenu->SetMenuInterface(this);
 }
 
 void UAllMagicGameInstance::Host()
@@ -52,6 +79,11 @@ void UAllMagicGameInstance::Host()
 
 void UAllMagicGameInstance::Join(const FString & Address)
 {
+	if (Menu != nullptr)
+	{
+		Menu->RemoveFromParent();
+	}
+
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 

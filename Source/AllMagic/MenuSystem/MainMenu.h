@@ -3,38 +3,60 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "MenuInterface.h"
+#include "MenuWidget.h"
 #include "MainMenu.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ALLMAGIC_API UMainMenu : public UUserWidget
+class ALLMAGIC_API UMainMenu : public UMenuWidget
 {
 	GENERATED_BODY()
 
 protected:
 	virtual bool Initialize() override;
 
-public:
-	void SetMenuInterface(IMenuInterface* MenuInterface);
-
-	void Setup();
-	void RemoveFromParent() override;
-
 private:
 	UFUNCTION()
 	void HostServer();
 
-	IMenuInterface* MenuInterface;
+	UFUNCTION()
+	void OpenMainMenu();
 
-	APlayerController* PlayerController;
+	UFUNCTION()
+	void OpenJoinMenu();
+
+	UFUNCTION()
+	void JoinServer();
+
+	UFUNCTION()
+	void ExitPressed();
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* HostButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* MenuSwitcher;
 	
 	UPROPERTY(meta = (BindWidget))
+	class UWidget* MainMenu;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* JoinMenu;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinMenuButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* CancelJoinMenuButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* JoinButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* ExitButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* IpAddressTextBox;
 };
